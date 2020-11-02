@@ -37,7 +37,6 @@ namespace wordCountConsole
                 }
                 foreach (var key in keysToRemove)
                     dictionary.Remove(key);
-
                 if (outputPath != "")
                 {
                     using (StreamWriter file = new StreamWriter(outputPath))
@@ -49,7 +48,7 @@ namespace wordCountConsole
 
             Console.WriteLine("Write wordcount [options] <input file path> , and then press Enter for frequency report");
             string line = Console.ReadLine();
-            if (line.StartsWith("wordcount"))
+                if (line.StartsWith("wordcount"))
             {
                 string command = line.Substring(10);
                 List<string> inputs = command.Split(" ").ToList();
@@ -67,7 +66,7 @@ namespace wordCountConsole
                     {
                         var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
                         CheckFrequency(inputs.ElementAt(2),wordsIncluded, outputPath);
-                        foreach (KeyValuePair<string, int> kvp in wordsIncluded)
+                        foreach (KeyValuePair<string, int> kvp in wordsIncluded.OrderByDescending(key => key.Value))
                         {
                             Console.WriteLine(kvp.Key + " " + kvp.Value.ToString());
                         }
@@ -81,17 +80,16 @@ namespace wordCountConsole
                     inputs.Remove("--lex");
                     string result = string.Join(",", inputs);
                     Console.WriteLine($"Inputs: {result}");
-                    var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
-
                     foreach (string i in inputs)
                     {
+                        var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
                         CheckFrequency(i, wordsIncluded);
-
-                        foreach (var item in wordsIncluded.OrderBy(i => i.Key))
+                        foreach (KeyValuePair<string, int> kvp in wordsIncluded.OrderBy(i => i.Key))
                         {
-                            Console.WriteLine(item);
+                            Console.WriteLine(kvp.Key + " " + kvp.Value.ToString());
                         }
                     }
+
                 }
                 //merge input file word frequencies
                 if (inputs.Contains("-m") || inputs.Contains("--merge"))
@@ -105,7 +103,7 @@ namespace wordCountConsole
                     {
                         CheckFrequency(i, wordsIncluded);
                     }
-                    foreach (KeyValuePair<string, int> kvp in wordsIncluded)
+                    foreach (KeyValuePair<string, int> kvp in wordsIncluded.OrderByDescending(key => key.Value))
                     {
                         Console.WriteLine(kvp.Key + " " + kvp.Value.ToString());
                     }
@@ -126,7 +124,7 @@ namespace wordCountConsole
                     {
                         CheckFrequency(i, wordsIncluded,"",ignoredList);
                     }  
-                    foreach (KeyValuePair<string, int> kvp in wordsIncluded)
+                    foreach (KeyValuePair<string, int> kvp in wordsIncluded.OrderByDescending(key => key.Value))
                     {
                         Console.WriteLine(kvp.Key + " " + kvp.Value.ToString());
                     }
@@ -141,19 +139,18 @@ namespace wordCountConsole
                     {
                         var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
                         CheckFrequency(i, wordsIncluded);
-                        foreach (KeyValuePair<string, int> kvp in wordsIncluded)
+                        foreach (KeyValuePair<string, int> kvp in wordsIncluded.OrderByDescending(key => key.Value))
                         {
                             Console.WriteLine(kvp.Key + " " + kvp.Value.ToString());
                         }
                     }
                 }
             }
-            else
-            {
-                Console.WriteLine("Invalid command!");
-                
-            }
+        else
+        { 
+                    Console.WriteLine("Invalid command!");
+        }
         }
     }
 }
-//missing: , exceptions, restarting, lexical order, ignoring words, testing, descending order as default
+//missing: , exceptions, restarting, lexical order gives double output, testing,
