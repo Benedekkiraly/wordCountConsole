@@ -17,12 +17,17 @@ namespace wordCountConsole
  
         static void Main(string[] args)
         {
-            void CheckFrequency(string filename, Dictionary<string, int> dictionary, string outputPath = "")
+            void CheckFrequency(string filename, Dictionary<string, int> dictionary, string outputPath = "", List<string> keysToRemove = null)
             {
                 var fileContent = File.ReadAllText(filename);
                 var wordPattern = new Regex(@"\w+");
-                List<string> keysToRemove = new List<string> { "a", "an", "or", "the",
+                if (keysToRemove == null)
+                {
+                 keysToRemove = new List<string> { "a", "an", "or", "the",
                  "and", "I", "you", "he", "she", "it", "we" , "they"};
+                }
+
+
                 foreach (Match match in wordPattern.Matches(fileContent))
                 {
                     int counter = 0;
@@ -53,6 +58,8 @@ namespace wordCountConsole
                 {
                     inputs.Remove("-o");
                     inputs.Remove("--output");
+                    string result = string.Join(",", inputs);
+                    Console.WriteLine($"Inputs: {result}");
                     string outputPath = inputs.ElementAt(1);
                     inputs.Remove(inputs.ElementAt(1));
 
@@ -67,11 +74,32 @@ namespace wordCountConsole
 
                     }
                 }
+                //lexical order
+                if (inputs.Contains("-l") || inputs.Contains("--lex"))
+                {
+                    inputs.Remove("-l");
+                    inputs.Remove("--lex");
+                    string result = string.Join(",", inputs);
+                    Console.WriteLine($"Inputs: {result}");
+                    var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
+
+                    foreach (string i in inputs)
+                    {
+                        CheckFrequency(i, wordsIncluded);
+
+                        foreach (var item in wordsIncluded.OrderBy(i => i.Key))
+                        {
+                            Console.WriteLine(item);
+                        }
+                    }
+                }
                 //merge input file word frequencies
                 if (inputs.Contains("-m") || inputs.Contains("--merge"))
                 {
                     inputs.Remove("-m");
                     inputs.Remove("--merge");
+                    string result = string.Join(",", inputs);
+                    Console.WriteLine($"Inputs: {result}");
                     var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
                     foreach (string i in inputs)
                     {
@@ -83,9 +111,32 @@ namespace wordCountConsole
                     }
 
                 }
+                //frequencies of words with ignored words as input
+                if (inputs.Contains("-i") || inputs.Contains("--ignore"))
+                {
+                    inputs.Remove("-i");
+                    inputs.Remove("--ignore");
+                    string result = string.Join(",", inputs);
+                    Console.WriteLine($"Inputs: {result}");
+                    var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
+                    List<string> ignoredWords = File.ReadAllLines(inputs.ElementAt(0)).ToList();
+                    List<string> ignoredList = ignoredWords.ElementAt(0).Split(" ").ToList();
+                    inputs.Remove(inputs.ElementAt(0));
+                    foreach (string i in inputs)
+                    {
+                        CheckFrequency(i, wordsIncluded,"",ignoredList);
+                    }  
+                    foreach (KeyValuePair<string, int> kvp in wordsIncluded)
+                    {
+                        Console.WriteLine(kvp.Key + " " + kvp.Value.ToString());
+                    }
+
+                }
                 //running without options
                 else
                 {
+                    string result = string.Join(",", inputs);
+                    Console.WriteLine($"Inputs: {result}");
                     foreach (string i in inputs)
                     {
                         var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
@@ -102,12 +153,7 @@ namespace wordCountConsole
                 Console.WriteLine("Invalid command!");
                 
             }
-            //switch (Console.ReadLine())
-            //{
-            //    case
-            //        Console.WriteLine("asd");
-            //        break;
-            //}
         }
     }
 }
+//missing: , exceptions, restarting, lexical order, ignoring words, testing, descending order as default
