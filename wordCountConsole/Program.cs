@@ -39,7 +39,7 @@ namespace wordCountConsole
                     dictionary.Remove(key);
                 if (outputPath != "")
                 {
-                    using (StreamWriter file = new StreamWriter(outputPath))
+                    using (StreamWriter file = File.AppendText(outputPath))
                         foreach (var entry in dictionary)
                             file.WriteLine("[{0} {1}]", entry.Key, entry.Value);
                 }
@@ -48,7 +48,7 @@ namespace wordCountConsole
 
             Console.WriteLine("Write wordcount [options] <input file path> , and then press Enter for frequency report");
             string line = Console.ReadLine();
-                if (line.StartsWith("wordcount"))
+            if (line.StartsWith("wordcount"))
             {
                 string command = line.Substring(10);
                 List<string> inputs = command.Split(" ").ToList();
@@ -59,13 +59,14 @@ namespace wordCountConsole
                     inputs.Remove("--output");
                     string result = string.Join(",", inputs);
                     Console.WriteLine($"Inputs: {result}");
-                    string outputPath = inputs.ElementAt(1);
-                    inputs.Remove(inputs.ElementAt(1));
+                    string outputPath = inputs.ElementAt(0);
+                    inputs.Remove(inputs.ElementAt(0));
+                    Console.WriteLine(outputPath);
 
                     foreach (string i in inputs)
                     {
                         var wordsIncluded = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
-                        CheckFrequency(inputs.ElementAt(2),wordsIncluded, outputPath);
+                        CheckFrequency(inputs.ElementAt(0),wordsIncluded, outputPath);
                         foreach (KeyValuePair<string, int> kvp in wordsIncluded.OrderByDescending(key => key.Value))
                         {
                             Console.WriteLine(kvp.Key + " " + kvp.Value.ToString());
@@ -153,4 +154,4 @@ namespace wordCountConsole
         }
     }
 }
-//missing: , exceptions, restarting, lexical order gives double output, testing,
+//missing: , exceptions, restarting, lexical order gives double output, testing, -o doesnt work properly
